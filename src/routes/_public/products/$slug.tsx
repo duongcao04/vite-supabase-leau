@@ -14,12 +14,12 @@ import {
   Link as LinkIcon,
   Menu,
   X,
-  Box, // For 3D Model
-  Maximize, // For 3D Model
-  Search, // For 3D Model
+  Box, // New Icon
+  Maximize, // New Icon
+  Search, // New Icon
 } from 'lucide-react'
 
-// --- 1. MOCK DATA ---
+// --- 1. Mock Data ---
 
 const PRODUCT_DATA = {
   title: 'Vent-O-Mat - RBX - Air Release Valves',
@@ -161,16 +161,17 @@ const RECENTLY_VIEWED = [
   'Pipestands Assembly - Zurn Wilkins 375LXL',
 ]
 
-// --- 2. ROUTE DEFINITION ---
+// --- 2. Route Definition ---
 
 export const Route = createFileRoute('/_public/products/$slug')({
   component: ProductDetailPage,
 })
 
-// --- 3. HELPER COMPONENTS ---
+// --- 3. Sub-Components for Tab Content ---
 
 function ResourceGroup({ title, items }: { title: string; items: any[] }) {
   const [isOpen, setIsOpen] = useState(true)
+
   return (
     <div className="border-b border-slate-200 py-6 last:border-0">
       <div
@@ -183,6 +184,7 @@ function ResourceGroup({ title, items }: { title: string; items: any[] }) {
           {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
       </div>
+
       {isOpen && (
         <div className="space-y-4">
           {items.map((item, idx) => (
@@ -204,10 +206,20 @@ function ResourceGroup({ title, items }: { title: string; items: any[] }) {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <button className="text-sm text-secondary hover:underline flex items-center gap-1">
-                  Download {item.size && `(${item.size})`}{' '}
-                  <Download size={14} />
-                </button>
+                {item.type === 'pdf' ? (
+                  <>
+                    <button className="text-sm text-secondary hover:underline flex items-center gap-1">
+                      Download ({item.size}) <Download size={14} />
+                    </button>
+                    <button className="text-sm text-secondary hover:underline underline-offset-2">
+                      View
+                    </button>
+                  </>
+                ) : (
+                  <button className="text-sm text-secondary hover:underline flex items-center gap-1">
+                    View <LinkIcon size={14} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -240,6 +252,7 @@ function RepairKitItem({
           {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
       </div>
+
       {isOpen && (
         <div className="pb-6 px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center">
@@ -258,7 +271,8 @@ function RepairKitItem({
                 <strong>Size:</strong> {kit.size}
               </p>
               <p className="mt-2 text-slate-500">
-                Includes all necessary seals and gaskets.
+                Includes all necessary seals and gaskets for standard
+                maintenance.
               </p>
             </div>
           </div>
@@ -268,250 +282,37 @@ function RepairKitItem({
   )
 }
 
-// --- 4. MAIN PAGE COMPONENT ---
+// --- 4. Main Page Component ---
 
 function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState('description')
-  const [openRepairKit, setOpenRepairKit] = useState<string | null>('RBX025-RK')
+  const [openRepairKit, setOpenRepairKit] = useState<string | null>('RBX025-RK') // Default open first
+
+  // New State for Mobile Hamburger Menu
   const [isTocOpen, setIsTocOpen] = useState(false)
 
-  const TABS = [
-    { id: 'description', label: 'Description' },
-    { id: 'resources', label: 'Resources' },
-    { id: 'how-to-order', label: 'How To Order' },
-    { id: 'repair-kits-spare-parts', label: 'Repair Kits & Spare Parts' },
-    { id: '3d-cad-models', label: '3D CAD Models' },
-    { id: 'contact', label: 'Contact' },
-  ]
-
-  const handleTabClick = (id: string) => {
+  const scrollToSection = (id: string) => {
     setActiveTab(id)
-    setIsTocOpen(false) // Close mobile menu when a tab is clicked
-    // Optional: Scroll to top of content area if needed
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setIsTocOpen(false) // Close mobile menu on selection
+    const element = document.getElementById(id)
+    if (element) {
+      // Offset for header + sticky tab bar
+      const y = element.getBoundingClientRect().top + window.scrollY - 180
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    }
   }
 
-  // --- CONTENT RENDERERS ---
-
-  const renderDescription = () => (
-    <div className="animate-in fade-in duration-300">
-      <div className="mb-8 bg-white p-4 border border-slate-200 rounded-lg shadow-sm">
-        <img
-          src={PRODUCT_DATA.images[0]}
-          alt={PRODUCT_DATA.title}
-          className="w-full h-auto max-h-[400px] object-contain mx-auto"
-        />
-      </div>
-      <h2 className="text-2xl font-bold text-[#1B365D] mb-4">
-        Product Description
-      </h2>
-      <p className="text-slate-700 leading-relaxed mb-8">
-        {PRODUCT_DATA.description}
-      </p>
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded border border-slate-200">
-          <h3 className="font-bold text-lg text-secondary mb-4 flex items-center gap-2">
-            <CheckCircle2 size={20} /> Features
-          </h3>
-          <ul className="space-y-2">
-            {PRODUCT_DATA.features.map((f, i) => (
-              <li key={i} className="text-sm pl-4 border-l-2 border-slate-100">
-                {f}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="bg-white p-6 rounded border border-slate-200">
-          <h3 className="font-bold text-lg text-secondary mb-4 flex items-center gap-2">
-            <CheckCircle2 size={20} /> Benefits
-          </h3>
-          <ul className="space-y-2">
-            {PRODUCT_DATA.benefits.map((b, i) => (
-              <li key={i} className="text-sm pl-4 border-l-2 border-slate-100">
-                {b}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderResources = () => (
-    <div className="animate-in fade-in duration-300">
-      <h2 className="text-2xl font-bold text-[#1B365D] mb-6">Resources</h2>
-      <div className="bg-white rounded border border-slate-200 px-6">
-        {PRODUCT_DATA.resources.map((grp, idx) => (
-          <ResourceGroup key={idx} title={grp.category} items={grp.items} />
-        ))}
-      </div>
-    </div>
-  )
-
-  const renderOrdering = () => (
-    <div className="animate-in fade-in duration-300">
-      <h2 className="text-2xl font-bold text-[#1B365D] mb-2">
-        {PRODUCT_DATA.title}
-      </h2>
-      <p className="text-slate-600 mb-6 text-sm">
-        For water pipeline applications. High performance, full porting for
-        maximum vacuum protection.
-      </p>
-      <div className="bg-white border border-slate-200 rounded overflow-hidden shadow-sm">
-        <div className="flex bg-slate-100 border-b border-slate-200">
-          <div className="w-1/4 p-4 hidden md:block">
-            <img src={PRODUCT_DATA.images[0]} className="mix-blend-multiply" />
-            <div className="bg-[#F37021] text-white text-xs text-center py-1 mt-2">
-              Vent-O-Mat - RBX100-1641
-            </div>
-          </div>
-          <div className="w-full md:w-3/4">
-            <div className="flex text-xs font-bold text-slate-700 border-b border-slate-200 bg-slate-50">
-              <div className="w-1/4 p-3">Product Code</div>
-              <div className="w-1/6 p-3">Size</div>
-              <div className="w-1/4 p-3">Pressure Rating</div>
-              <div className="w-1/3 p-3">Description</div>
-            </div>
-            <div className="divide-y divide-slate-100 max-h-[300px] overflow-y-auto custom-scrollbar">
-              {PRODUCT_DATA.orderTable.map((row, idx) => (
-                <div
-                  key={idx}
-                  className="flex text-xs text-slate-600 hover:bg-orange-50 transition-colors"
-                >
-                  <div className="w-1/4 p-3 font-medium text-slate-800">
-                    {row.code}
-                  </div>
-                  <div className="w-1/6 p-3">{row.size}</div>
-                  <div className="w-1/4 p-3">{row.pressure}</div>
-                  <div className="w-1/3 p-3">{row.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderRepairKits = () => (
-    <div className="animate-in fade-in duration-300">
-      <h2 className="text-2xl font-bold text-[#1B365D] mb-6">Repair Kits</h2>
-      <div className="bg-white border border-slate-200 rounded">
-        {PRODUCT_DATA.repairKits.map((kit) => (
-          <RepairKitItem
-            key={kit.code}
-            kit={kit}
-            isOpen={openRepairKit === kit.code}
-            onToggle={() =>
-              setOpenRepairKit(openRepairKit === kit.code ? null : kit.code)
-            }
-          />
-        ))}
-      </div>
-    </div>
-  )
-
-  const render3DCAD = () => (
-    <div className="animate-in fade-in duration-300">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h2 className="text-2xl font-bold text-[#1B365D]">3D CAD Models</h2>
-        <div className="flex gap-4">
-          <button className="text-sm font-bold text-secondary hover:underline flex items-center gap-1">
-            How to Download <Box size={16} />
-          </button>
-        </div>
-      </div>
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="grid lg:grid-cols-3">
-          {/* Left: Viewer Area */}
-          <div className="lg:col-span-2 bg-slate-100 relative min-h-[400px] flex items-center justify-center group">
-            <iframe
-              src="https://gmail6120010.autodesk360.com/shares/public/SH90d2dQT28d5b6028114c4ffb771a8766ae?mode=embed"
-              width="800"
-              height="480"
-              allowFullScreen={true}
-            ></iframe>
-          </div>
-          {/* Right: File List */}
-          <div className="lg:col-span-1 border-l border-slate-200 p-6 bg-white">
-            <h3 className="font-bold text-[#1B365D] mb-4 text-sm uppercase tracking-wider">
-              Available Files
-            </h3>
-            <div className="space-y-3 mb-8">
-              {PRODUCT_DATA.cadModels.files.map((file, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded cursor-pointer border border-transparent hover:border-slate-200 transition-all"
-                >
-                  <Box size={20} className="text-slate-400" />
-                  <div className="flex-grow">
-                    <p className="text-xs font-bold text-slate-700">
-                      {file.name}
-                    </p>
-                    <p className="text-[10px] text-slate-400 uppercase">
-                      {file.type} File
-                    </p>
-                  </div>
-                  <Download size={16} className="text-secondary" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderContact = () => (
-    <div className="animate-in fade-in duration-300">
-      <h2 className="text-2xl font-bold text-[#F37021] mb-6 border-l-4 border-[#F37021] pl-4">
-        Contact Form
-      </h2>
-      <div className="bg-white p-8 border border-orange-200 rounded shadow-sm">
-        <form className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-[#1B365D]">
-                Full name
-              </label>
-              <input
-                type="text"
-                className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-[#1B365D]">
-                Company name
-              </label>
-              <input
-                type="text"
-                className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
-              />
-            </div>
-          </div>
-          {/* Additional fields omitted for brevity, add as needed */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-[#1B365D]">Message</label>
-            <textarea
-              rows={4}
-              className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
-            ></textarea>
-          </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="bg-[#F37021] hover:bg-orange-600 text-white font-bold py-3 px-8 rounded shadow-md transition-colors uppercase text-sm"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
+  const TABS = [
+    'Description',
+    'Resources',
+    'How To Order',
+    'Repair Kits & Spare Parts',
+    '3D CAD Models',
+    'Contact',
+  ]
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="container py-8">
       {/* Breadcrumbs */}
       <div className="text-sm text-slate-500 mb-6 flex items-center gap-2 flex-wrap">
         <Link to="/" className="hover:text-secondary">
@@ -535,62 +336,366 @@ function ProductDetailPage() {
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* 1. LEFT COLUMN: Vertical Navigation (Table of Contents) */}
-        <aside className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 z-30">
-          {/* Mobile Header Bar */}
-          <div className="flex lg:hidden justify-between items-center py-3 px-4 bg-white border border-slate-200 rounded shadow-sm mb-4">
-            <span className="font-bold text-[#1B365D] flex items-center gap-2">
-              <FileText size={18} /> Table of Contents
-            </span>
-            <button
-              onClick={() => setIsTocOpen(!isTocOpen)}
-              className="p-2 bg-slate-100 rounded hover:bg-slate-200 text-[#1B365D]"
+      <div className="flex flex-col lg:flex-row gap-12">
+        {/* --- LEFT COLUMN: Sticky Content --- */}
+        <div className="flex-grow w-full lg:w-3/4">
+          {/* Sticky Navigation Tabs (Table of Contents) with Hamburger */}
+          <div className="sticky top-0 bg-slate-50 z-30 mb-8 border-b border-slate-200 shadow-sm lg:shadow-none">
+            {/* Mobile Header Bar */}
+            <div className="flex lg:hidden justify-between items-center py-3 px-2 bg-white border border-slate-200 rounded-t">
+              <span className="font-bold text-[#1B365D] flex items-center gap-2">
+                <FileText size={18} /> Table of Contents
+              </span>
+              <button
+                onClick={() => setIsTocOpen(!isTocOpen)}
+                className="p-2 bg-slate-100 rounded hover:bg-slate-200 text-[#1B365D]"
+              >
+                {isTocOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+
+            {/* Nav Links Container */}
+            <nav
+              className={`
+                ${isTocOpen ? 'flex' : 'hidden'} 
+                lg:flex flex-col lg:flex-row gap-1 lg:gap-1 
+                bg-white lg:bg-transparent p-2 lg:p-0 
+                border-x border-b lg:border-0 border-slate-200 lg:rounded-none rounded-b
+                absolute lg:static w-full left-0 shadow-lg lg:shadow-none
+                overflow-x-auto no-scrollbar
+              `}
             >
-              {isTocOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+              {TABS.map((tab) => {
+                const id = tab
+                  .toLowerCase()
+                  .replace(/ /g, '-')
+                  .replace('&', '')
+                  .replace('--', '-')
+                const isActive = activeTab === id
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => scrollToSection(id)}
+                    className={`
+                        text-left lg:text-center px-4 lg:px-6 py-3 text-sm font-bold 
+                        border-l-4 lg:border-l-0 lg:border-t-4 transition-colors whitespace-nowrap
+                        ${
+                          isActive
+                            ? 'border-secondary bg-orange-50 lg:bg-white text-secondary lg:shadow-[0_-2px_4px_rgba(0,0,0,0.05)]'
+                            : 'border-transparent hover:bg-slate-100 text-slate-600'
+                        }
+                      `}
+                  >
+                    {tab}
+                  </button>
+                )
+              })}
+            </nav>
           </div>
 
-          {/* Nav Links Container */}
-          <nav
-            className={`
-            ${isTocOpen ? 'block' : 'hidden'} lg:block
-            bg-white rounded border border-slate-200 overflow-hidden shadow-sm lg:shadow-none
-          `}
-          >
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.id)}
-                className={`
-                  w-full text-left px-5 py-4 text-sm font-bold border-l-4 transition-all
-                  flex justify-between items-center
-                  ${
-                    activeTab === tab.id
-                      ? 'border-secondary bg-orange-50 text-secondary'
-                      : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-[#1B365D]'
-                  }
-                `}
-              >
-                {tab.label}
-                {activeTab === tab.id && <ChevronRight size={16} />}
-              </button>
-            ))}
-          </nav>
-        </aside>
+          {/* TAB: DESCRIPTION */}
+          <div id="description" className="mb-16 scroll-mt-48">
+            <div className="mb-8 bg-white p-4 border border-slate-200 rounded-lg shadow-sm">
+              <img
+                src={PRODUCT_DATA.images[0]}
+                alt={PRODUCT_DATA.title}
+                className="w-full h-auto max-h-[400px] object-contain mx-auto"
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-[#1B365D] mb-4">
+              Product Description
+            </h2>
+            <p className="text-slate-700 leading-relaxed mb-8">
+              {PRODUCT_DATA.description}
+            </p>
 
-        {/* 2. MIDDLE COLUMN: Active Content Area */}
-        <div className="flex-1 min-w-0 w-full">
-          {activeTab === 'description' && renderDescription()}
-          {activeTab === 'resources' && renderResources()}
-          {activeTab === 'how-to-order' && renderOrdering()}
-          {activeTab === 'repair-kits-spare-parts' && renderRepairKits()}
-          {activeTab === '3d-cad-models' && render3DCAD()}
-          {activeTab === 'contact' && renderContact()}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-white p-6 rounded border border-slate-200">
+                <h3 className="font-bold text-lg text-secondary mb-4 flex items-center gap-2">
+                  <CheckCircle2 size={20} /> Features
+                </h3>
+                <ul className="space-y-2">
+                  {PRODUCT_DATA.features.map((f, i) => (
+                    <li
+                      key={i}
+                      className="text-sm pl-4 border-l-2 border-slate-100"
+                    >
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-white p-6 rounded border border-slate-200">
+                <h3 className="font-bold text-lg text-secondary mb-4 flex items-center gap-2">
+                  <CheckCircle2 size={20} /> Benefits
+                </h3>
+                <ul className="space-y-2">
+                  {PRODUCT_DATA.benefits.map((b, i) => (
+                    <li
+                      key={i}
+                      className="text-sm pl-4 border-l-2 border-slate-100"
+                    >
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* TAB: RESOURCES */}
+          <div
+            id="resources"
+            className="mb-16 scroll-mt-48 border-t border-slate-200 pt-8"
+          >
+            <h2 className="text-2xl font-bold text-[#1B365D] mb-6">
+              Resources
+            </h2>
+            <div className="bg-white rounded border border-slate-200 px-6">
+              {PRODUCT_DATA.resources.map((grp, idx) => (
+                <ResourceGroup
+                  key={idx}
+                  title={grp.category}
+                  items={grp.items}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* TAB: HOW TO ORDER */}
+          <div
+            id="how-to-order"
+            className="mb-16 scroll-mt-48 border-t border-slate-200 pt-8"
+          >
+            <h2 className="text-2xl font-bold text-[#1B365D] mb-2">
+              {PRODUCT_DATA.title}
+            </h2>
+            <p className="text-slate-600 mb-6 text-sm">
+              For water pipeline applications. High performance, full porting
+              for maximum vacuum protection.
+            </p>
+
+            <div className="bg-white border border-slate-200 rounded overflow-hidden shadow-sm">
+              <div className="flex bg-slate-100 border-b border-slate-200">
+                <div className="w-1/4 p-4 hidden md:block">
+                  <img
+                    src={PRODUCT_DATA.images[0]}
+                    className="mix-blend-multiply"
+                  />
+                  <div className="bg-[#F37021] text-white text-xs text-center py-1 mt-2">
+                    Vent-O-Mat - RBX100-1641
+                  </div>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <div className="flex text-xs font-bold text-slate-700 border-b border-slate-200 bg-slate-50">
+                    <div className="w-1/4 p-3">Product Code</div>
+                    <div className="w-1/6 p-3">Size</div>
+                    <div className="w-1/4 p-3">Pressure Rating</div>
+                    <div className="w-1/3 p-3">Description</div>
+                  </div>
+                  <div className="divide-y divide-slate-100 max-h-[300px] overflow-y-auto custom-scrollbar">
+                    {PRODUCT_DATA.orderTable.map((row, idx) => (
+                      <div
+                        key={idx}
+                        className="flex text-xs text-slate-600 hover:bg-orange-50 transition-colors"
+                      >
+                        <div className="w-1/4 p-3 font-medium text-slate-800">
+                          {row.code}
+                        </div>
+                        <div className="w-1/6 p-3">{row.size}</div>
+                        <div className="w-1/4 p-3">{row.pressure}</div>
+                        <div className="w-1/3 p-3">{row.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* TAB: REPAIR KITS */}
+          <div
+            id="repair-kits-spare-parts"
+            className="mb-16 scroll-mt-48 border-t border-slate-200 pt-8"
+          >
+            <h2 className="text-2xl font-bold text-[#1B365D] mb-6">
+              Repair Kits
+            </h2>
+            <div className="bg-slate-50 border border-slate-200 rounded-t overflow-hidden mb-6">
+              <div className="flex text-xs font-bold text-slate-700 bg-slate-100 border-b border-slate-200 p-3">
+                <div className="w-1/3">Product Code</div>
+                <div className="w-1/3">Size</div>
+                <div className="w-1/3">Description</div>
+              </div>
+              {PRODUCT_DATA.repairKits.map((kit, idx) => (
+                <div
+                  key={idx}
+                  className="flex text-xs text-slate-600 p-3 border-b border-slate-200 last:border-0 bg-white"
+                >
+                  <div className="w-1/3 font-medium">{kit.code}</div>
+                  <div className="w-1/3">{kit.size}</div>
+                  <div className="w-1/3">VOM-RBX - Repair Kit</div>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white border border-slate-200 rounded-b">
+              {PRODUCT_DATA.repairKits.map((kit) => (
+                <RepairKitItem
+                  key={kit.code}
+                  kit={kit}
+                  isOpen={openRepairKit === kit.code}
+                  onToggle={() =>
+                    setOpenRepairKit(
+                      openRepairKit === kit.code ? null : kit.code,
+                    )
+                  }
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* TAB: 3D CAD MODELS (NEW) */}
+          <div
+            id="3d-cad-models"
+            className="mb-16 scroll-mt-48 border-t border-slate-200 pt-8"
+          >
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+              <h2 className="text-2xl font-bold text-[#1B365D]">
+                3D CAD Models
+              </h2>
+              <div className="flex gap-4">
+                <button className="text-sm font-bold text-secondary hover:underline flex items-center gap-1">
+                  How to Download <Box size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+              <div className="grid lg:grid-cols-3">
+                {/* Left: Viewer Area */}
+                <div className="lg:col-span-2 bg-slate-100 relative min-h-[400px] flex items-center justify-center group">
+                  <iframe
+                    src="https://gmail6120010.autodesk360.com/shares/public/SH90d2dQT28d5b6028114c4ffb771a8766ae?mode=embed"
+                    width="800"
+                    height="480"
+                    allowFullScreen={true}
+                  ></iframe>
+                </div>
+
+                {/* Right: File List & Download */}
+                <div className="lg:col-span-1 border-l border-slate-200 p-6 bg-white">
+                  <h3 className="font-bold text-[#1B365D] mb-4 text-sm uppercase tracking-wider">
+                    Available Files
+                  </h3>
+                  <div className="space-y-3 mb-8">
+                    {PRODUCT_DATA.cadModels.files.map((file, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded cursor-pointer border border-transparent hover:border-slate-200 transition-all"
+                      >
+                        <Box size={20} className="text-slate-400" />
+                        <div className="flex-grow">
+                          <p className="text-xs font-bold text-slate-700">
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400 uppercase">
+                            {file.type} File
+                          </p>
+                        </div>
+                        <Download size={16} className="text-secondary" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* TAB: CONTACT */}
+          <div
+            id="contact"
+            className="mb-16 scroll-mt-48 border-t border-slate-200 pt-8"
+          >
+            <h2 className="text-2xl font-bold text-[#F37021] mb-6 border-l-4 border-[#F37021] pl-4">
+              Contact Form
+            </h2>
+            <div className="bg-white p-8 border border-orange-200 rounded shadow-sm">
+              <form className="space-y-6">
+                {/* Form Inputs ... */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#1B365D]">
+                      Full name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#1B365D]">
+                      Company name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#1B365D]">
+                      Contact number
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#1B365D]">
+                      Email address
+                    </label>
+                    <input
+                      type="email"
+                      className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1B365D]">
+                    Region / Branch Location
+                  </label>
+                  <select className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none bg-white">
+                    <option>Select Region</option>
+                    <option>Auckland</option>
+                    <option>Wellington</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#1B365D]">
+                    Message
+                  </label>
+                  <textarea
+                    rows={4}
+                    className="w-full border border-slate-300 rounded p-2 text-sm focus:border-secondary outline-none"
+                  ></textarea>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    className="bg-[#F37021] hover:bg-orange-600 text-white font-bold py-3 px-8 rounded shadow-md transition-colors uppercase text-sm"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
 
-        {/* 3. RIGHT COLUMN: Specifications Sidebar */}
-        <aside className="w-full lg:w-72 flex-shrink-0 space-y-8 lg:sticky lg:top-24">
+        {/* --- RIGHT COLUMN: Sidebar --- */}
+        <aside className="w-full lg:w-1/4 flex-shrink-0 space-y-8 h-fit lg:sticky lg:top-24">
           {/* Specs Card */}
           <div className="bg-white border-t-4 border-secondary p-6 shadow-sm rounded-sm">
             <div className="space-y-4">
@@ -635,13 +740,13 @@ function ProductDetailPage() {
 
             <div className="mt-8 space-y-3">
               <button
-                onClick={() => handleTabClick('how-to-order')}
+                onClick={() => scrollToSection('how-to-order')}
                 className="w-full bg-secondary hover:bg-orange-600 text-white font-bold py-3 rounded transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
                 <Settings size={18} /> How to Order
               </button>
               <button
-                onClick={() => handleTabClick('contact')}
+                onClick={() => scrollToSection('contact')}
                 className="w-full border-2 border-[#1B365D] hover:bg-[#1B365D] hover:text-white text-[#1B365D] font-bold py-3 rounded transition-colors flex items-center justify-center gap-2"
               >
                 <Phone size={18} /> Contact Us
@@ -651,7 +756,7 @@ function ProductDetailPage() {
 
           {/* Repair Kits Link */}
           <div
-            onClick={() => handleTabClick('repair-kits-spare-parts')}
+            onClick={() => scrollToSection('repair-kits-spare-parts')}
             className="bg-slate-100 p-4 rounded border border-slate-200 hover:border-secondary cursor-pointer transition-colors group"
           >
             <h4 className="font-bold text-[#1B365D] flex justify-between items-center text-sm">
@@ -663,6 +768,23 @@ function ProductDetailPage() {
             </h4>
             <p className="text-xs text-slate-500 mt-1">
               Find compatible parts for this series.
+            </p>
+          </div>
+
+          {/* 3D Models Link (NEW) */}
+          <div
+            onClick={() => scrollToSection('3d-cad-models')}
+            className="bg-slate-100 p-4 rounded border border-slate-200 hover:border-secondary cursor-pointer transition-colors group"
+          >
+            <h4 className="font-bold text-[#1B365D] flex justify-between items-center text-sm">
+              3D CAD Models
+              <Box
+                size={16}
+                className="text-secondary group-hover:scale-110 transition-transform"
+              />
+            </h4>
+            <p className="text-xs text-slate-500 mt-1">
+              View and download 3D files.
             </p>
           </div>
 
