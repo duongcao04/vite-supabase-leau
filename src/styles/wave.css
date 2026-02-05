@@ -1,0 +1,24 @@
+@theme {
+  /* --- KEYFRAMES --- */
+  /* Di chuyển sóng từ trái qua phải */
+  @keyframes wave-move {
+    0% {
+      transform: translateX(-90px);
+    }
+    100% {
+      transform: translateX(85px);
+    }
+  }
+
+  /* --- ANIMATIONS --- */
+  /* Định nghĩa thời gian chạy khác nhau để tạo cảm giác tự nhiên */
+  --animate-wave-slow: wave-move 20s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  --animate-wave-medium: wave-move 13s cubic-bezier(0.55, 0.5, 0.45, 0.5)
+    infinite;
+  --animate-wave-fast: wave-move 10s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  --animate-wave-turbo: wave-move 7s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+
+  /* --- COLORS (Tùy chọn) --- */
+  --color-water-light: var(--primary-600);
+  --color-water-dark: var(--primary-700);
+}
