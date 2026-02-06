@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
+import { Route as PublicContactRouteImport } from './routes/_public/contact'
 import { Route as PublicProductsIndexRouteImport } from './routes/_public/products/index'
 import { Route as PublicHomeIndexRouteImport } from './routes/_public/_home/index'
 import { Route as PublicProductsSlugRouteImport } from './routes/_public/products/$slug'
@@ -17,6 +18,11 @@ import { Route as PublicProductsSlugRouteImport } from './routes/_public/product
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PublicContactRoute = PublicContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => PublicRoute,
 } as any)
 const PublicProductsIndexRoute = PublicProductsIndexRouteImport.update({
   id: '/products/',
@@ -36,10 +42,12 @@ const PublicProductsSlugRoute = PublicProductsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicHomeIndexRoute
+  '/contact': typeof PublicContactRoute
   '/products/$slug': typeof PublicProductsSlugRoute
   '/products/': typeof PublicProductsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/contact': typeof PublicContactRoute
   '/products/$slug': typeof PublicProductsSlugRoute
   '/': typeof PublicHomeIndexRoute
   '/products': typeof PublicProductsIndexRoute
@@ -47,18 +55,20 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_public': typeof PublicRouteWithChildren
+  '/_public/contact': typeof PublicContactRoute
   '/_public/products/$slug': typeof PublicProductsSlugRoute
   '/_public/_home/': typeof PublicHomeIndexRoute
   '/_public/products/': typeof PublicProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/products/$slug' | '/products/'
+  fullPaths: '/' | '/contact' | '/products/$slug' | '/products/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/products/$slug' | '/' | '/products'
+  to: '/contact' | '/products/$slug' | '/' | '/products'
   id:
     | '__root__'
     | '/_public'
+    | '/_public/contact'
     | '/_public/products/$slug'
     | '/_public/_home/'
     | '/_public/products/'
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_public/contact': {
+      id: '/_public/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof PublicContactRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_public/products/': {
       id: '/_public/products/'
@@ -102,12 +119,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface PublicRouteChildren {
+  PublicContactRoute: typeof PublicContactRoute
   PublicProductsSlugRoute: typeof PublicProductsSlugRoute
   PublicHomeIndexRoute: typeof PublicHomeIndexRoute
   PublicProductsIndexRoute: typeof PublicProductsIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
+  PublicContactRoute: PublicContactRoute,
   PublicProductsSlugRoute: PublicProductsSlugRoute,
   PublicHomeIndexRoute: PublicHomeIndexRoute,
   PublicProductsIndexRoute: PublicProductsIndexRoute,
