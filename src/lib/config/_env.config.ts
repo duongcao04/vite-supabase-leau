@@ -2,7 +2,7 @@ import * as yup from 'yup'
 
 // 1. Add .required() for critical variables and defaults for others
 const configSchema = yup.object({
-    appTitle: yup.string().default('Yangis Course'),
+    appTitle: yup.string().default('isovalve'),
     appVersion: yup.string().default('v1.0.0'),
     apiEndpoint: yup.string().required('VITE_API_ENDPOINT is required'),
     appUrl: yup.string().required('VITE_APP_URL is required'),
