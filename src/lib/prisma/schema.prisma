@@ -1,0 +1,110 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Industry {
+  id          String    @id @default(cuid())
+  name        String    @unique // e.g., "Water Utilities", "Mining", "Agriculture"
+  description String?
+  products    Product[]
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique // e.g., "Vent-O-Mat" [cite: 21]
+  logo     String?
+  products Product[]
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique // e.g., "Air Release Valves" [cite: 9]
+
+  // Hierarchical categories
+  parentId String?
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+
+  products Product[]
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  displayName    String
+  productCode    String   @unique // e.g., "ROXD50-2511" [cite: 61]
+  sizeRange      String? // "25mm to 200mm" [cite: 24]
+  connectionType String[] // ["Threaded Male BSPT", "Flanged"] 
+  frequency      Int? //  433 MHz
+  performance    String[] // "640MC - OIML R49:R400" and "640C - OIML R49:R160"
+
+  brandId    String
+  brand      Brand    @relation(fields: [brandId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  industryId     String
+  industry       Industry         @relation(fields: [industryId], references: [id])
+
+  series         String // e.g., "Series RBX" 
+  description    String // "Anti-Shock air release and vacuum break" 
+  features       String[] // e.g., "High-capacity air discharge" [cite: 33]
+  benefits       String[] // e.g., "Surge pressure magnitudes reduced" [cite: 37]
+  applications   String   @default("Water pipeline")
+  certifications String[] // e.g., "NSF61 approved" 
+
+  variants   ProductVariant[]
+  repairKits RepairKit[]
+  cadModels  CADModel[]
+  resources  Resource[]
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  SKU         String   @unique // e.g., "ROXD50-2511" [cite: 61]
+  displayName String
+  thumbnail   String
+  images      String[]
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model RepairKit {
+  id        String  @id @default(cuid())
+  kitCode   String  @unique // e.g., "RBX025-RK-25mm-Repair Kit" 
+  size      Int // Size compatibility 
+  includes  String  @default("Necessary seals and guides")
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model CADModel {
+  id         String  @id @default(cuid())
+  fileName   String // e.g., "30-Vent-C-Mat-25" [cite: 110]
+  fileFormat String  @default("3D CAD")
+  size       String // e.g., "25mm" [cite: 110]
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+}
+
+enum ResourceType {
+  DATA_SHEET
+  IOM_MANUAL
+  CAD_MODEL
+  VIDEO
+}
+
+model Resource {
+  id           String       @id @default(cuid())
+  title        String // e.g., "Data Sheet - Sensus - 640MC/640C"
+  url          String // Direct download/view link
+  embedFrame   String? // Stores the <iframe> tag or embeddable URL
+  fileSize     String? // e.g., "1.2 MB" or "2.3 MB"
+  resourceType ResourceType // Categorizes the document
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}

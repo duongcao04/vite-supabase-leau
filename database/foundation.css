@@ -1,0 +1,38 @@
+INSERT INTO "Industry" ("id", "name", "description") VALUES
+('ind_waterworks', 'Waterworks', 'Municipal water distribution and management solutions'),
+('ind_irrigation', 'Irrigation', 'Agricultural and landscape water delivery systems'),
+('ind_fire_protection', 'Fire Protection', 'Critical fire suppression and safety water systems'),
+('ind_building_industry', 'Building and Industry', 'Commercial and industrial process water solutions');
+
+INSERT INTO "Brand" ("id", "name") VALUES
+('brand_sensus', 'Sensus'),
+('brand_bermad', 'Bermad'),
+('brand_zurn_wilkins', 'Zurn Wilkins'),
+('brand_talgil', 'Talgil'),
+('brand_amiad_arkal', 'Amiad/Arkal'),
+('brand_vent_o_mat', 'Vent-O-Mat'),
+('brand_johnson_screens', 'Johnson Screens'),
+('brand_filtersafe', 'Filtersafe'),
+('brand_naandanjain', 'NaanDanJain'),
+('brand_azud', 'Azud');
+
+-- Top Level Categories
+INSERT INTO "Category" ("id", "name", "parentId") VALUES
+('cat_air_valves', 'Air Valves', NULL),
+('cat_backflow', 'Backflow Prevention', NULL),
+('cat_control_valves', 'Control Valves', NULL),
+('cat_filtration', 'Filtration', NULL),
+('cat_metering', 'Metering', NULL);
+
+-- Child Categories for Air Valves 
+INSERT INTO "Category" ("id", "name", "parentId") VALUES
+('cat_auto_air', 'Automatic Air Valves', 'cat_air_valves'),
+('cat_comb_air', 'Combination Air Valves', 'cat_air_valves'),
+('cat_kin_air', 'Kinetic Air Valves', 'cat_air_valves'),
+('cat_air_release', 'Air Release Valves', 'cat_air_valves');
+
+-- Child Categories for Metering
+INSERT INTO "Category" ("id", "name", "parentId") VALUES
+('cat_bulk_water', 'Bulk Water Meters', 'cat_metering'),
+('cat_domestic_water', 'Domestic Water Meters', 'cat_metering'),
+('cat_radio_water', 'Radio Water Meters', 'cat_metering'); 

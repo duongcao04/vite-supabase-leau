@@ -6,6 +6,11 @@ const configSchema = yup.object({
     appVersion: yup.string().default('v1.0.0'),
     apiEndpoint: yup.string().required('VITE_API_ENDPOINT is required'),
     appUrl: yup.string().required('VITE_APP_URL is required'),
+    supabase: yup.object({
+        url: yup.string().required("VITE_SUPABASE_URL is required"),
+        anonKey: yup.string().required("VITE_SUPABASE_ANON_KEY is required")
+    }
+    )
 })
 
 function configProject() {
@@ -16,6 +21,10 @@ function configProject() {
                 appVersion: import.meta.env.VITE_APP_VERSION,
                 apiEndpoint: import.meta.env.VITE_API_ENDPOINT,
                 appUrl: import.meta.env.VITE_APP_URL,
+                supabase: {
+                    url: import.meta.env.VITE_SUPABASE_URL,
+                    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+                }
             },
             {
                 abortEarly: false, // Show all missing vars at once, not just the first one

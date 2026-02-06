@@ -11,7 +11,7 @@ export * from './lodash';
 export * from './motion';
 export * from './phone-number';
 export * from './queries/helper';
-export * from './queries/options/course-queries';
+export * from './queries/options/product-queries';
 export * from './query-string';
 export * from './utils/_app-permissions';
 export * from './utils/_cad-service';
